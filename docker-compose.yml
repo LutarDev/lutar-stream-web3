@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  # Magic Mirror SFU
+  sfu:
+    image: colinmarc/magic-mirror:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    networks:
+      - mirrorplay
+
+  # Next.js Frontend
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_STREAM_API_KEY=${STREAM_API_KEY}
+      - NEXT_PUBLIC_SFU_URL=ws://sfu:8080
+      - NEXT_PUBLIC_THIRDWEB_CLIENT_ID=${NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
+      - STREAM_API_KEY=${STREAM_API_KEY}
+      - STREAM_API_SECRET=${STREAM_API_SECRET}
+      - THIRDWEB_SECRET_KEY=${THIRDWEB_SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRY=${JWT_EXPIRY}
+    depends_on:
+      - sfu
+    restart: unless-stopped
+    networks:
+      - mirrorplay
+
+  # Optional: VOD Recording Service
+  vod-recorder:
+    image: ffmpeg:latest
+    volumes:
+      - ./recordings:/recordings
+    command: >
+      ffmpeg -i http://sfu:8080/room/{roomId}/output
+             -c:v libx264 -preset ultrafast -c:a aac
+             /recordings/{roomId}.mp4
+    restart: unless-stopped
+    networks:
+      - mirrorplay
+
+networks:
+  mirrorplay:
+    driver: bridge

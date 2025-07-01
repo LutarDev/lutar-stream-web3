@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Eye, Users, Clock } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+import axios from "axios";
+import Link from "next/link";
+import { 
+  Play, 
+  Users, 
+  Clock,
+  TrendingUp
+} from "lucide-react";
 
 interface Stream {
   id: string;
@@ -23,184 +30,132 @@ interface Stream {
 
 export default function Home() {
   const [streams, setStreams] = useState<Stream[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Simulate fetching live streams
-    const mockStreams: Stream[] = [
-      {
-        id: "room-1",
-        title: "Epic Valorant Ranked Climb 🚀",
-        thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=640&h=360&fit=crop",
-        streamer: {
-          address: "0xABC123",
-          displayName: "ProGamer_42"
-        },
-        viewerCount: 1234,
-        isLive: true,
-        startedAt: "2024-01-15T10:30:00Z",
-        category: "Gaming"
-      },
-      {
-        id: "room-2",
-        title: "Building the Future of Web3 💻",
-        thumbnail: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=640&h=360&fit=crop",
-        streamer: {
-          address: "0xDEF456",
-          displayName: "DevMaster"
-        },
-        viewerCount: 856,
-        isLive: true,
-        startedAt: "2024-01-15T11:15:00Z",
-        category: "Technology"
-      },
-      {
-        id: "room-3",
-        title: "Chill Art Stream 🎨",
-        thumbnail: "https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=640&h=360&fit=crop",
-        streamer: {
-          address: "0xGHI789",
-          displayName: "ArtisticSoul"
-        },
-        viewerCount: 432,
-        isLive: true,
-        startedAt: "2024-01-15T09:45:00Z",
-        category: "Creative"
-      },
-      {
-        id: "room-4",
-        title: "Learning Solidity Together 📚",
-        thumbnail: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=640&h=360&fit=crop",
-        streamer: {
-          address: "0xJKL012",
-          displayName: "BlockchainTutor"
-        },
-        viewerCount: 678,
-        isLive: true,
-        startedAt: "2024-01-15T12:00:00Z",
-        category: "Education"
-      },
-      {
-        id: "room-5",
-        title: "Late Night Music Production 🎵",
-        thumbnail: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=640&h=360&fit=crop",
-        streamer: {
-          address: "0xMNO345",
-          displayName: "BeatMaker"
-        },
-        viewerCount: 289,
-        isLive: true,
-        startedAt: "2024-01-15T08:20:00Z",
-        category: "Music"
-      },
-      {
-        id: "room-6",
-        title: "Speedrun Challenge WR Attempt ⚡",
-        thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=640&h=360&fit=crop",
-        streamer: {
-          address: "0xPQR678",
-          displayName: "SpeedDemon"
-        },
-        viewerCount: 2156,
-        isLive: true,
-        startedAt: "2024-01-15T13:30:00Z",
-        category: "Gaming"
+    const fetchStreams = async () => {
+      try {
+        const response = await axios.get("/api/streams");
+        const streamData = response.data.map((activity: any) => ({
+          id: activity.foreign_id,
+          title: activity.extra_data?.title || "Untitled Stream",
+          thumbnail: activity.extra_data?.thumbnail || "https://dummyimage.com/640x360/000/fff&text=Stream",
+          streamer: {
+            address: activity.actor || "unknown",
+            displayName: `User ${activity.actor?.slice(5, 11) || "Unknown"}...`,
+          },
+          viewerCount: Math.floor(Math.random() * 1000) + 1,
+          isLive: activity.extra_data?.is_live || false,
+          startedAt: activity.time,
+          category: "Gaming",
+        }));
+        setStreams(streamData);
+      } catch (error) {
+        console.error("Failed to fetch streams:", error);
+      } finally {
+        setIsLoading(false);
       }
-    ];
+    };
 
-    setStreams(mockStreams);
+    fetchStreams();
   }, []);
 
   const formatDuration = (startedAt: string) => {
     const start = new Date(startedAt);
     const now = new Date();
     const diff = Math.floor((now.getTime() - start.getTime()) / 1000 / 60);
-
+    
     if (diff < 60) return `${diff}m`;
     const hours = Math.floor(diff / 60);
     const minutes = diff % 60;
     return `${hours}h ${minutes}m`;
   };
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Live on MirrorPlay</h1>
-        <p className="text-muted-foreground">
-          Discover amazing creators streaming live with Web3 technology
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {streams.map((stream) => (
-          <Link key={stream.id} href={`/watch/${stream.id}`}>
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden">
-              <div className="relative">
-                <img
-                  src={stream.thumbnail}
-                  alt={stream.title}
-                  className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-3 left-3">
-                  <Badge className="bg-red-600 hover:bg-red-600 text-white flex items-center space-x-1">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                    <span>LIVE</span>
-                  </Badge>
-                </div>
-                <div className="absolute top-3 right-3">
-                  <Badge variant="secondary" className="flex items-center space-x-1">
-                    <Eye className="h-3 w-3" />
-                    <span>{stream.viewerCount.toLocaleString()}</span>
-                  </Badge>
-                </div>
-                <div className="absolute bottom-3 right-3">
-                  <Badge variant="outline" className="bg-background/80 backdrop-blur-sm">
-                    {stream.category}
-                  </Badge>
-                </div>
-              </div>
-
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <div className="h-48 bg-gray-700 rounded-t-lg"></div>
               <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                  {stream.title}
-                </h3>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                        {stream.streamer.address.slice(2, 4).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-sm font-medium">{stream.streamer.displayName}</p>
-                      <p className="text-xs text-muted-foreground font-mono">
-                        {stream.streamer.address.slice(0, 6)}...{stream.streamer.address.slice(-4)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    <span>{formatDuration(stream.startedAt)}</span>
-                  </div>
-                </div>
+                <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                <div className="h-3 bg-gray-700 rounded w-2/3"></div>
               </CardContent>
             </Card>
-          </Link>
-        ))}
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Live Streams</h1>
+        <p className="text-gray-400">Discover amazing content from creators around the world</p>
       </div>
 
-      <div className="mt-12 text-center">
-        <p className="text-muted-foreground mb-4">
-          Ready to start streaming?
-        </p>
-        <Link
-          href="/broadcast"
-          className="inline-flex items-center justify-center rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-        >
-          Start Your Stream
-        </Link>
-      </div>
+      {streams.length === 0 ? (
+        <Card className="text-center py-12">
+          <CardContent>
+            <TrendingUp className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-xl font-semibold mb-2">No Live Streams</h3>
+            <p className="text-gray-400 mb-4">Be the first to go live!</p>
+            <Link href="/broadcast">
+              <Button>
+                <Play className="w-4 h-4 mr-2" />
+                Start Streaming
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {streams.map((stream) => {
+            const streamId = stream.id || `stream:${Math.random().toString(36).substring(7)}`;
+            const roomId = streamId.includes(':') ? streamId.split(':')[1] : streamId;
+            
+            return (
+              <Link key={stream.id || streamId} href={`/watch/${roomId}`}>
+                <Card className="hover:scale-105 transition-transform cursor-pointer">
+                  <div className="relative">
+                    <img
+                      src={stream.thumbnail}
+                      alt={stream.title}
+                      className="w-full h-48 object-cover rounded-t-lg"
+                    />
+                    {stream.isLive && (
+                      <div className="absolute top-2 left-2 flex items-center gap-1 bg-red-600 text-white px-2 py-1 rounded-full text-xs">
+                        <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                        LIVE
+                      </div>
+                    )}
+                    <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/50 text-white px-2 py-1 rounded-full text-xs">
+                      <Users className="w-3 h-3" />
+                      {stream.viewerCount}
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-1 line-clamp-2">{stream.title}</h3>
+                    <p className="text-sm text-gray-400 mb-2">{stream.streamer.displayName}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary">{stream.category}</Badge>
+                      {stream.isLive && (
+                        <div className="flex items-center gap-1 text-xs text-gray-400">
+                          <Clock className="w-3 h-3" />
+                          {formatDuration(stream.startedAt)}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

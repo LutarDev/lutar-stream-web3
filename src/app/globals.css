@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 13% 6%;
+    --foreground: 220 13% 95%;
+    --card: 220 13% 8%;
+    --card-foreground: 220 13% 95%;
+    --popover: 220 13% 8%;
+    --popover-foreground: 220 13% 95%;
+    --primary: 262 100% 65%;
+    --primary-foreground: 220 13% 95%;
+    --secondary: 220 13% 12%;
+    --secondary-foreground: 220 13% 75%;
+    --muted: 220 13% 12%;
+    --muted-foreground: 220 13% 60%;
+    --accent: 262 50% 50%;
+    --accent-foreground: 220 13% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 220 13% 95%;
+    --border: 220 13% 20%;
+    --input: 220 13% 15%;
+    --ring: 262 100% 65%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+/* Gaming-inspired glow effects */
+.glow-primary {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Animated background for stream cards */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.2);
+  }
+}
+
+.live-card {
+  animation: pulse-glow 3s infinite;
+}
+
+/* Gradient text for brand */
+.gradient-text {
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Video overlay improvements */
+.video-overlay {
+  background: linear-gradient(
+    45deg,
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(59, 130, 246, 0.1) 100%
+  );
+}
+
+/* Chat message animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.chat-message {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Loading shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Custom button styles for gaming aesthetic */
+.btn-gaming {
+  @apply bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700;
+  @apply text-white font-bold py-2 px-4 rounded-lg;
+  @apply transition-all duration-300 transform hover:scale-105;
+  @apply shadow-lg hover:shadow-purple-500/25;
+}
+
+/* Stream status indicators */
+.status-live {
+  @apply bg-red-600 text-white animate-pulse;
+}
+
+.status-offline {
+  @apply bg-gray-600 text-gray-300;
+}
+
+/* Wallet connection styles */
+.wallet-connected {
+  @apply bg-green-500/10 border-green-500/20 text-green-400;
+}
+
+.wallet-disconnected {
+  @apply bg-red-500/10 border-red-500/20 text-red-400;
+}
+
+/* Typography improvements */
+.text-gradient {
+  @apply bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent;
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-300;
+  @apply hover:shadow-2xl hover:shadow-purple-500/10;
+  @apply hover:-translate-y-1;
+}
+
+/* Navigation improvements */
+.nav-blur {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Stream grid responsive improvements */
+@media (max-width: 768px) {
+  .stream-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .stream-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .stream-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Custom focus styles for accessibility */
+.focus-purple:focus {
+  @apply outline-none ring-2 ring-purple-500/50 ring-offset-2 ring-offset-background;
+}
+
+/* Video player improvements */
+.video-controls {
+  @apply bg-gradient-to-t from-black/80 via-black/40 to-transparent;
+}
+
+/* Tip amount buttons */
+.tip-btn {
+  @apply border-2 border-yellow-500/20 bg-yellow-500/10 text-yellow-400;
+  @apply hover:border-yellow-500/40 hover:bg-yellow-500/20;
+  @apply transition-all duration-200;
+}
+
+.tip-btn:hover {
+  box-shadow: 0 0 15px rgba(234, 179, 8, 0.3);
+}

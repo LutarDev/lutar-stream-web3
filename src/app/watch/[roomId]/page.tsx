@@ -94,13 +94,13 @@ export default function WatchPage({ params }: WatchPageProps) {
             setChatMessages((prev) => [
               ...prev,
               {
-                id: event.message.id,
+                id: event.message!.id,
                 user: {
-                  address: event.message.user?.id || "unknown",
-                  displayName: event.message.user?.name || "Unknown User",
+                  address: event.message!.user?.id || "unknown",
+                  displayName: event.message!.user?.name || "Unknown User",
                 },
-                message: event.message.text || "",
-                timestamp: new Date(event.message.created_at || Date.now()),
+                message: event.message!.text || "",
+                timestamp: new Date(event.message!.created_at || Date.now()),
                 type: "message",
               },
             ]);
@@ -127,7 +127,7 @@ export default function WatchPage({ params }: WatchPageProps) {
     if (roomId) {
       initializeStream();
     }
-  }, [roomId, user]);
+  }, [roomId, user, streamChatClient]);
 
   const sendMessage = () => {
     if (!messageInput.trim() || !channel) return;

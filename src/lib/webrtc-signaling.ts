@@ -19,7 +19,7 @@ export class WebRTCSignaling {
 
   async connect(): Promise<{ pc: RTCPeerConnection; ws: WebSocket }> {
     return new Promise((resolve, reject) => {
-      const sfuUrl = process.env.NEXT_PUBLIC_SFU_URL || "ws://localhost:8080";
+      const sfuUrl = process.env.NEXT_PUBLIC_SFU_URL || "ws://localhost:9599";
       this.ws = new WebSocket(`${sfuUrl}/signal`);
       this.pc = new RTCPeerConnection({
         iceServers: [

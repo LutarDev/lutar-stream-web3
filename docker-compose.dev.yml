@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  sfu:
+    image: colinmarc/magic-mirror:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+    networks:
+      - mirrorplay
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_STREAM_API_KEY=${STREAM_API_KEY}
+      - NEXT_PUBLIC_SFU_URL=ws://sfu:8080
+      - NEXT_PUBLIC_THIRDWEB_CLIENT_ID=${NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
+      - STREAM_API_KEY=${STREAM_API_KEY}
+      - STREAM_API_SECRET=${STREAM_API_SECRET}
+      - THIRDWEB_SECRET_KEY=${THIRDWEB_SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRY=${JWT_EXPIRY}
+    depends_on:
+      - sfu
+    restart: unless-stopped
+    networks:
+      - mirrorplay
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+networks:
+  mirrorplay:
+    driver: bridge

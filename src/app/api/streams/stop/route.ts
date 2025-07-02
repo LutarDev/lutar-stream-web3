@@ -17,12 +17,12 @@ function verifyToken(authHeader: string | null) {
 }
 
 // Stream Feeds API helper
-async function streamFeedsRequest(endpoint: string, method: string = 'GET', data?: any) {
+async function streamFeedsRequest(endpoint: string, method: string = 'GET', data?: unknown) {
   const baseUrl = `https://api.stream-io-api.com/api/v1.0/feed`;
   const url = `${baseUrl}${endpoint}`;
   
   const headers = {
-    'Authorization': `Bearer ${process.env.STREAM_API_KEY}`,
+    'Authorization': `Bearer ${process.env.STREAM_API_SECRET}`,
     'Content-Type': 'application/json',
   };
 

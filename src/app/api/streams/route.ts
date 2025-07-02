@@ -18,12 +18,12 @@ function verifyToken(authHeader: string | null) {
 }
 
 // Stream Feeds API helper
-async function streamFeedsRequest(endpoint: string, method: string = 'GET', data?: any) {
+async function streamFeedsRequest(endpoint: string, method: string = 'GET', data?: unknown) {
   const baseUrl = `https://api.stream-io-api.com/api/v1.0/feed`;
   const url = `${baseUrl}${endpoint}`;
   
   const headers = {
-    'Authorization': `Bearer ${process.env.STREAM_API_KEY}`,
+    'Authorization': `Bearer ${process.env.STREAM_API_SECRET}`,
     'Content-Type': 'application/json',
   };
 
@@ -46,18 +46,18 @@ export async function GET() {
     const response = await streamFeedsRequest('/streams/global/?limit=25&filter=is_live:true');
     
     // Transform the response to match your frontend expectations
-    const streams = response.results.map((activity: any) => ({
+    const streams = response.results.map((activity: Record<string, unknown>) => ({
       id: activity.foreign_id || `stream:${activity.id}`,
-      title: activity.extra_data?.title || "Untitled Stream",
-      thumbnail: activity.extra_data?.thumbnail || "https://dummyimage.com/640x360/000/fff&text=Stream",
+      title: (activity.extra_data as Record<string, unknown>)?.title || "Untitled Stream",
+      thumbnail: (activity.extra_data as Record<string, unknown>)?.thumbnail || "https://dummyimage.com/640x360/000/fff&text=Stream",
       streamer: {
-        address: activity.actor?.replace('user:', '') || "0x123...",
-        displayName: `User ${activity.actor?.slice(5, 11) || "Unknown"}...`,
+        address: (activity.actor as string)?.replace('user:', '') || "0x123...",
+        displayName: `User ${(activity.actor as string)?.slice(5, 11) || "Unknown"}...`,
       },
       viewerCount: Math.floor(Math.random() * 1000) + 1,
-      isLive: activity.extra_data?.is_live || false,
+      isLive: (activity.extra_data as Record<string, unknown>)?.is_live || false,
       startedAt: activity.time,
-      category: activity.extra_data?.category || "Gaming",
+      category: (activity.extra_data as Record<string, unknown>)?.category || "Gaming",
     }));
 
     return NextResponse.json(streams);

@@ -1,0 +1,6 @@
+[server]
+bind = "0.0.0.0:9599"
+
+[apps.default]
+command = ["echo", "No app configured"]
+xwayland = true

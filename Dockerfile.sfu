@@ -1,0 +1,25 @@
+FROM debian:bookworm-slim
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    libxkbcommon0 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download and install the latest mmserver binary
+RUN curl -fsSL "https://github.com/colinmarc/magic-mirror/releases/download/mmserver-v0.8.3/mmserver-v0.8.3-linux-amd64.tar.gz" \
+    | tar zxv && \
+    mv mmserver-v0.8.3/mmserver /usr/local/bin/mmserver && \
+    rm -rf mmserver-v0.8.3
+
+# Create config directory
+RUN mkdir -p /etc/magic-mirror/apps.d
+
+# Create a basic config
+RUN echo '[apps.default]\ncommand = ["echo", "No app configured"]\nxwayland = true' > /etc/magic-mirror/mmserver.toml
+
+EXPOSE 9599
+
+# Start mmserver with config
+CMD ["mmserver", "-C", "/etc/magic-mirror/mmserver.toml", "--bind", "0.0.0.0:9599"]

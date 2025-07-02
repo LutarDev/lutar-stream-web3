@@ -37,17 +37,17 @@ export default function Home() {
     const fetchStreams = async () => {
       try {
         const response = await axios.get("/api/streams");
-        const streamData = response.data.map((activity: any) => ({
-          id: activity.foreign_id,
-          title: activity.extra_data?.title || "Untitled Stream",
-          thumbnail: activity.extra_data?.thumbnail || "https://dummyimage.com/640x360/000/fff&text=Stream",
+        const streamData = response.data.map((activity: Record<string, unknown>) => ({
+          id: activity.foreign_id as string,
+          title: (activity.extra_data as Record<string, unknown>)?.title || "Untitled Stream",
+          thumbnail: (activity.extra_data as Record<string, unknown>)?.thumbnail || "https://dummyimage.com/640x360/000/fff&text=Stream",
           streamer: {
-            address: activity.actor || "unknown",
-            displayName: `User ${activity.actor?.slice(5, 11) || "Unknown"}...`,
+            address: activity.actor as string || "unknown",
+            displayName: `User ${(activity.actor as string)?.slice(5, 11) || "Unknown"}...`,
           },
           viewerCount: Math.floor(Math.random() * 1000) + 1,
-          isLive: activity.extra_data?.is_live || false,
-          startedAt: activity.time,
+          isLive: (activity.extra_data as Record<string, unknown>)?.is_live || false,
+          startedAt: activity.time as string,
           category: "Gaming",
         }));
         setStreams(streamData);

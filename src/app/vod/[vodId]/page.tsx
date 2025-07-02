@@ -230,7 +230,7 @@ export default function VODPlayerPage({ params }: VODPlayerProps) {
                 <div className="flex items-center space-x-3">
                   <Avatar className="h-12 w-12">
                     <AvatarFallback className="bg-primary text-primary-foreground">
-                      {vodInfo.streamer.address.slice(2, 4).toUpperCase()}
+                      {vodInfo.streamer.displayName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>

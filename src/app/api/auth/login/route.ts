@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { StreamChat } from "stream-chat";
 import { createAuth } from "thirdweb/auth";
 import { createThirdwebClient } from "thirdweb";
@@ -23,17 +22,16 @@ export async function POST(request: NextRequest) {
     // Verify the login payload and signature
     const verifiedPayload = await auth.verifyPayload({ payload, signature });
 
-    // In a real implementation, you would verify the signature here
-    // For now, we'll use a simplified approach
-    const address = payload.address || "0x1234567890123456789012345678901234567890";
-    // Create JWT token
-    const token = jwt.sign(
-      { sub: address.toLowerCase() },
-      process.env.JWT_SECRET || '',
-      { expiresIn: process.env.JWT_EXPIRY || "7d" }
-    );
+    if (!verifiedPayload.valid) {
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
+      );
+    }
 
-    // Create Stream user token
+    const address = verifiedPayload.payload.address;
+    
+    // Create Stream user token (this is the JWT for Stream)
     const streamToken = streamClient.createToken(address.toLowerCase());
 
     // Create or update Stream user
@@ -43,8 +41,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      token,
-      streamToken,
+      streamToken, // Use Stream token as your auth token
       address: address.toLowerCase(),
     });
   } catch (error) {

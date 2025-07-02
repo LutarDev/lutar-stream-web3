@@ -238,7 +238,7 @@ function VODGrid({
                 <div className="flex items-center space-x-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                      {vod.streamer.address.slice(2, 4).toUpperCase()}
+                      {vod.streamer.displayName.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   <div>

@@ -1,16 +1,20 @@
 version: "3.9"
 
 services:
-  # Magic Mirror SFU
+  # Build Magic Mirror server from source
   sfu:
-    image: colinmarc/magic-mirror:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.sfu
     ports:
-      - "8080:8080"
+      - "9599:9599"
     environment:
       - RUST_LOG=info
     restart: unless-stopped
     networks:
       - mirrorplay
+    volumes:
+      - ./config:/etc/magic-mirror
 
   # Next.js Frontend
   client:
@@ -20,32 +24,40 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - NODE_ENV=production
       - NEXT_PUBLIC_STREAM_API_KEY=${STREAM_API_KEY}
-      - NEXT_PUBLIC_SFU_URL=ws://sfu:8080
+      - NEXT_PUBLIC_SFU_URL=ws://sfu:9599
       - NEXT_PUBLIC_THIRDWEB_CLIENT_ID=${NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
       - STREAM_API_KEY=${STREAM_API_KEY}
       - STREAM_API_SECRET=${STREAM_API_SECRET}
       - THIRDWEB_SECRET_KEY=${THIRDWEB_SECRET_KEY}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRY=${JWT_EXPIRY}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN=${NEXT_PUBLIC_THIRDWEB_AUTH_DOMAIN}
+      - NEXT_PUBLIC_CHAIN_ID=${NEXT_PUBLIC_CHAIN_ID}
     depends_on:
       - sfu
     restart: unless-stopped
     networks:
       - mirrorplay
+    volumes:
+      - ./recordings:/app/recordings
 
-  # Optional: VOD Recording Service
+  # Optional: VOD Recording Service (Client-side recording recommended instead)
   vod-recorder:
-    image: ffmpeg:latest
+    image: jrottenberg/ffmpeg:latest
     volumes:
       - ./recordings:/recordings
     command: >
-      ffmpeg -i http://sfu:8080/room/{roomId}/output
-             -c:v libx264 -preset ultrafast -c:a aac
-             /recordings/{roomId}.mp4
+      ffmpeg -f webm -i rtp://sfu:9599/stream
+             -c:v copy -c:a aac
+             /recordings/stream.mp4
     restart: unless-stopped
     networks:
       - mirrorplay
+    depends_on:
+      - sfu
 
 networks:
   mirrorplay:
